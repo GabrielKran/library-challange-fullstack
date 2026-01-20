@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { UsersModule } from './users/users.module';
+import { BooksModule } from './books/books.module';
+import { ReservationsModule } from './reservations/reservations.module';
 
 @Module({
   imports: [
@@ -18,6 +21,12 @@ import { ConfigModule } from '@nestjs/config';
       entities: [__dirname + '/**/*.entity{.ts,.js}'], // Escaneia todas as entidades
       synchronize: true, // Isso cria as tabelas sozinho (Auto-DDL).
     }),
+    
+    UsersModule,
+    
+    BooksModule,
+    
+    ReservationsModule,
   ],
   controllers: [],
   providers: [],
