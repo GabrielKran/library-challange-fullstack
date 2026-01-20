@@ -8,7 +8,7 @@ import { Book } from './entities/book.entity';
 export class BooksService {
   constructor(
     @InjectRepository(Book)
-    private booksRepository: Repository<Book>,
+    private booksRepository: Repository<Book>
   ) {}
 
   create(createBookDto: CreateBookDto) {
