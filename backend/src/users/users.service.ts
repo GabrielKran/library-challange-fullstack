@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -72,5 +73,28 @@ export class UsersService {
     }
 
     return this.usersRepository.remove(user);
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) throw new NotFoundException('Usuário não encontrado');
+    
+    // VALIDA EMAIL DUPLICADO
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      // Se mandou um email novo, verifica se já existe ALGUÉM COM ESSE EMAIL
+      const emailExists = await this.usersRepository.findOneBy({ email: updateUserDto.email });
+      
+      // Se existe E não sou eu mesmo
+      if (emailExists && emailExists.id !== id) {
+        throw new ConflictException('Este e-mail já está em uso por outro usuário.');
+      }
+      user.email = updateUserDto.email;
+    }
+
+    if (updateUserDto.name) {
+      user.name = updateUserDto.name;
+    }
+    
+    return this.usersRepository.save(user);
   }
 }
