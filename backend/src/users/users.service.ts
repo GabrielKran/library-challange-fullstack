@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -10,7 +10,7 @@ export class UsersService {
 
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>, // Injeção de dependência do Repositório
+    private usersRepository: Repository<User>
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -53,5 +53,24 @@ export class UsersService {
       throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
     }
     return user;
+  }
+
+  async remove(id: string) {
+    const user = await this.usersRepository.findOne({ 
+      where: { id },
+      relations: ['reservations'] 
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuário ID ${id} não encontrado`);
+    }
+
+    if (user.reservations.length > 0) {
+      throw new BadRequestException(
+        'Não é possível deletar usuário que possui histórico de reservas. (Regra de Integridade)'
+      );
+    }
+
+    return this.usersRepository.remove(user);
   }
 }
