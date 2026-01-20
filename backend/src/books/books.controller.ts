@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('books')
 export class BooksController {
@@ -19,5 +20,11 @@ export class BooksController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.booksService.findOne(id);
+  }
+
+  // Importe Patch e UpdateBookDto (crie o arquivo DTO igual ao do User se não tiver)
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
+    return this.booksService.update(id, updateBookDto);
   }
 }

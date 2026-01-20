@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateBookDto } from './dto/create-book.dto';
 import { Book } from './entities/book.entity';
+import { UpdateBookDto } from './dto/update-book.dto';
 
 @Injectable()
 export class BooksService {
@@ -27,5 +28,15 @@ export class BooksService {
       throw new NotFoundException(`Livro ID ${id} não encontrado`);
     }
     return book;
+  }
+
+  async update(id: string, updateBookDto: UpdateBookDto) {
+    const book = await this.booksRepository.findOneBy({ id });
+    if (!book) throw new NotFoundException('Livro não encontrado');
+    
+    // Atualiza os campos que vieram
+    this.booksRepository.merge(book, updateBookDto);
+    
+    return this.booksRepository.save(book);
   }
 }
