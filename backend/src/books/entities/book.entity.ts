@@ -18,7 +18,7 @@ export class Book {
   @Column({ nullable: true }) // URL da imagem da capa
   imageUrl: string;
 
-  @Column({ default: true }) // Se false, o livro não aparece para reserva [cite: 10]
+  @Column({ default: true }) // Se false, o livro não aparece para reserva
   isAvailable: boolean;
 
   @OneToMany(() => Reservation, (reservation) => reservation.book)
