@@ -1,0 +1,31 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <h2>Criar Nova Conta</h2>
+    
+    <div class="form-group">
+      <label>Nome Completo</label>
+      <input [(ngModel)]="data.name" placeholder="Seu nome">
+    </div>
+
+    <div class="form-group">
+      <label>Email (Login)</label>
+      <input type="email" [(ngModel)]="data.email" placeholder="seu@email.com">
+    </div>
+
+    <div class="form-group">
+      <label>CPF</label>
+      <input [(ngModel)]="data.cpf" (input)="onCpfInput($event)" placeholder="000.000.000-00">
+    </div>
+
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" [(ngModel)]="data.password" placeholder="******">
+    </div>
+
+    <button class="btn-primary full-width" (click)="onRegister()">Cadastrar</button>
+    
+    <p class="hint">
+      Já tem conta? <a routerLink="/login">Faça Login</a>
+    </p>
+  </div>
+</div>

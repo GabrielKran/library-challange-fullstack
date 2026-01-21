@@ -15,27 +15,34 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+
+    const existingUser = await this.usersRepository.exists({
+      where: [
+       {email: createUserDto.email},
+       {cpf: createUserDto.cpf} 
+      ]
+    });
+
+    if (existingUser) {
+      throw new BadRequestException('Email ou CPF já registrados');
+    }
+
     try {
-      // 1. Criptografar a senha (Salt de 10 rounds)
       const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-      // 2. Criar o objeto (ainda não salvo)
       const user = this.usersRepository.create({
         ...createUserDto,
         password: hashedPassword,
-        role: 'CLIENT', // Força que todo cadastro público seja CLIENT
+        role: 'CLIENT',
       });
 
-      // 3. Salvar no Banco
       const savedUser = await this.usersRepository.save(user);
 
-      // 4. Deleta a senha do objeto ANTES de retornar
       const { password, ...result } = savedUser;
 
       return result
 
     } catch (error) {
-      // Tratamento de erro de duplicidade (Código 1062 do MySQL)
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('CPF ou Email já cadastrado no sistema.');
       }
@@ -44,7 +51,6 @@ export class UsersService {
   }
 
   async findAll() {
-    // Retorna todos os usuários (a senha vem oculta por causa do @Column({select: false}) na Entity)
     return this.usersRepository.find();
   }
 
@@ -79,12 +85,9 @@ export class UsersService {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) throw new NotFoundException('Usuário não encontrado');
     
-    // VALIDA EMAIL DUPLICADO
     if (updateUserDto.email && updateUserDto.email !== user.email) {
-      // Se mandou um email novo, verifica se já existe ALGUÉM COM ESSE EMAIL
       const emailExists = await this.usersRepository.findOneBy({ email: updateUserDto.email });
       
-      // Se existe E não sou eu mesmo
       if (emailExists && emailExists.id !== id) {
         throw new ConflictException('Este e-mail já está em uso por outro usuário.');
       }
