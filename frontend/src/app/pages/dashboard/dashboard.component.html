@@ -1,0 +1,78 @@
+<div class="container">
+  <header>
+    <h1>📚 Biblioteca Central</h1>
+    <div class="user-info">
+      <button (click)="logout()" class="btn-danger">Sair</button>
+    </div>
+  </header>
+
+ <section *ngIf="myReservations.length > 0" class="my-books-section">
+    <h2>📖 Meus Livros Alugados</h2>
+    <div class="grid">
+      <div *ngFor="let res of myReservations" class="card active-loan">
+        <div class="card-body">
+          <h3>{{ res.book.title }}</h3>
+          
+          <p [class.status-late]="isLate(res.endDate)" 
+             [class.status-ok]="!isLate(res.endDate)">
+             {{ isLate(res.endDate) ? 'ATRASADO!' : 'No Prazo' }} <br>
+             Vence em: {{ res.endDate | date:'dd/MM/yyyy' }}
+          </p>
+
+          <button class="btn-return" (click)="initiateReturn(res)">
+            Devolver Livro
+          </button>
+        </div>
+      </div>
+    </div>
+    <hr class="divider">
+  </section>
+
+  <div *ngIf="showFineModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>⚠️ Atraso Detectado</h3>
+      <p>O livro <strong>{{ selectedReservation?.book?.title }}</strong> está atrasado.</p>
+      <p>Para devolver, é necessário pagar a taxa de:</p>
+      
+      <div class="fine-value">
+        {{ fineSimulation | currency:'BRL' }}
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button class="btn-primary" (click)="confirmReturn(selectedReservation.id)">
+          Pagar e Devolver
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <h2>🔍 Acervo Disponível</h2>
+  
+  <div *ngIf="books.length === 0" class="empty-state">
+    <p>Carregando acervo...</p>
+  </div>
+
+  <div class="grid">
+    <div *ngFor="let book of books" class="card">
+      <img [src]="book.imageUrl" [alt]="book.title" class="book-cover">
+      
+      <div class="card-body">
+        <h3>{{ book.title }}</h3>
+        <p class="author">{{ book.author }}</p>
+        
+        <span [class.available]="book.isAvailable" 
+              [class.unavailable]="!book.isAvailable"
+              class="badge">
+          {{ book.isAvailable ? 'Disponível' : 'Indisponível' }}
+        </span>
+
+        <button class="btn-primary" 
+                [disabled]="!book.isAvailable"
+                (click)="reserve(book)">
+          {{ book.isAvailable ? 'Reservar' : 'Reservado' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

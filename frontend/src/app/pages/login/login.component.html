@@ -1,0 +1,22 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <h2>Entrar na Biblioteca</h2>
+    
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input 
+        id="email"
+        type="email" 
+        [(ngModel)]="email" 
+        placeholder="admin@library.com"
+        (keyup.enter)="onLogin()" 
+      >
+    </div>
+
+    <button class="btn-primary full-width" (click)="onLogin()">
+      Acessar Sistema
+    </button>
+
+    <p class="hint">Dica: Use <strong>admin@library.com</strong></p>
+  </div>
+</div>
