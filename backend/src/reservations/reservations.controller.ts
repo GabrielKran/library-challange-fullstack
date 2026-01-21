@@ -23,7 +23,6 @@ export class ReservationsController {
     return this.reservationsService.create(createReservationDto);
   }
 
-  // Adicione este método novo
   @Post(':id/return')
   returnBook(@Param('id') id: string) {
     return this.reservationsService.returnBook(id);

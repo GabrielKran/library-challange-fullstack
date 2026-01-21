@@ -122,4 +122,23 @@ export class ReservationsService {
       fineToPay: fine,
     };
   }
+
+  async remove(id: string) {
+    const reservation = await this.reservationRepository.findOne({ 
+        where: { id }, relations: ['book'] 
+    });
+    if (!reservation) throw new NotFoundException('Reserva não encontrada');
+    
+    if (reservation.status !== 'ACTIVE') {
+      throw new BadRequestException('Não é possível cancelar reserva já finalizada');
+    }
+
+    // Devolve o livro
+    const book = reservation.book;
+    book.isAvailable = true;
+    await this.bookRepository.save(book);
+
+    return this.reservationRepository.remove(reservation);
+  }
+  
 }

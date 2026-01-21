@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -34,9 +34,28 @@ export class BooksService {
     const book = await this.booksRepository.findOneBy({ id });
     if (!book) throw new NotFoundException('Livro não encontrado');
     
-    // Atualiza os campos que vieram
     this.booksRepository.merge(book, updateBookDto);
     
     return this.booksRepository.save(book);
+  }
+
+  async remove(id: string) {
+    const book = await this.booksRepository.findOne({
+      where: { id },
+      relations: ['reservations']
+    });
+
+    if (!book) {
+      throw new NotFoundException('Livro não encontrado');
+    }
+
+    // Se a lista de reservas não for vazia, significa que alguém já pegou esse livro um dia.
+    if (book.reservations.length > 0) {
+      throw new BadRequestException(
+        'Não é possível apagar este livro pois ele possui histórico de empréstimos.'
+      );
+    }
+
+    return this.booksRepository.remove(book);
   }
 }
