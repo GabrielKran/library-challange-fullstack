@@ -1,41 +1,47 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { RolesGuard } from 'src/auth/roles.guard';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @Roles('CLIENT', 'ADMIN')
   @Get()
-  findAll() {
-    return this.reservationsService.findAll();
+  findAll(@Req() req) {
+    return this.reservationsService.findAll(req.user);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reservationsService.findOne(id);
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.reservationsService.findOne(id);
+  // }
 
-  @UseGuards(JwtAuthGuard)
+  @Roles('CLIENT')
   @Post()
-  create(@Body() createReservationDto: CreateReservationDto) {
+  create(@Body() createReservationDto: CreateReservationDto, @Req() req) {
 
-    console.log('PAYLOAD RECEBIDO:', createReservationDto);
-    return this.reservationsService.create(createReservationDto);
+    const payload = {
+      ...createReservationDto,
+      userId: req.user.userId,
+    };
+    return this.reservationsService.create(payload);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Roles('ADMIN')
   @Post(':id/return')
   returnBook(@Param('id') id: string) {
     return this.reservationsService.returnBook(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Roles('CLIENT')
   @Delete(':id')
-    remove(@Param('id') id: string) {
-      return this.reservationsService.remove(id);
+  cancel(@Param('id') id: string) {
+      return this.reservationsService.cancel(id);
     }
 }

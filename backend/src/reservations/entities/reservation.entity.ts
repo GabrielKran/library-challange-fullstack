@@ -11,7 +11,7 @@ export class Reservation {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Book, (book) => book.reservations)
+  @ManyToOne(() => Book, (book) => book.reservations, { onDelete: 'CASCADE' } ) // Deleta o livro e todo o histórico junto
   @JoinColumn({ name: 'book_id' })
   book: Book;
 

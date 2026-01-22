@@ -41,8 +41,7 @@ export class BooksService {
 
   async remove(id: string) {
     const book = await this.booksRepository.findOne({
-      where: { id },
-      relations: ['reservations']
+      where: { id }
     });
 
     if (!book) {
@@ -50,7 +49,7 @@ export class BooksService {
     }
 
     // Se a lista de reservas não for vazia, significa que alguém já pegou esse livro um dia.
-    if (book.reservations.length > 0) {
+    if (!book.isAvailable) {
       throw new BadRequestException(
         'Não é possível apagar este livro pois ele possui histórico de empréstimos.'
       );

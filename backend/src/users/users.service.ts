@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -62,7 +62,11 @@ export class UsersService {
     return user;
   }
 
-  async remove(id: string) {
+  async remove(id: string, currentUser: any) {
+    if (currentUser.role !== 'ADMIN' && currentUser.userId !== id) {
+        throw new ForbiddenException('Você não tem permissão para excluir este usuário.');
+    }
+
     const user = await this.usersRepository.findOne({ 
       where: { id },
       relations: ['reservations'] 
