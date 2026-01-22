@@ -9,7 +9,9 @@ import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     // Carrega as variáveis do .env
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal:true,
+    }),
     
     // Configuração assíncrona do TypeORM (igual configurar o DataSource no Java)
     TypeOrmModule.forRoot({

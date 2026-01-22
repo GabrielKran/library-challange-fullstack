@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
-import { access } from 'fs';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -11,10 +11,10 @@ export class AuthService {
         private jwtService: JwtService
     ) {}
 
-    async signIn(email: string, pass: string) {
+    async signIn(email: string, password: string) {
         const user = await this.userService.findByEmailForAuth(email);
 
-        if (!user || !(await bcrypt.compare(pass, user.password))) {
+        if (!user || !(await bcrypt.compare(password, user.password))) {
             throw new UnauthorizedException('Email ou senha incorretos');
         }
 
@@ -28,4 +28,9 @@ export class AuthService {
             }
         };
     }
+
+    async register(createUserDto: CreateUserDto) {
+        return this.userService.create(createUserDto);
+    }
+    
 }

@@ -101,7 +101,6 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-
   async findByEmailForAuth(email: string) {
     return this.usersRepository.findOne({ 
       where: { email },
