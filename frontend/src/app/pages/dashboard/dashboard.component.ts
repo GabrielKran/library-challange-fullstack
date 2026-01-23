@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { BooksService, Book } from '../../services/books.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { FormsModule } from '@angular/forms';
+import { UsersService } from '../../services/users.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule], 
+  imports: [CommonModule, FormsModule], 
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -16,6 +18,21 @@ export class DashboardComponent implements OnInit {
   books: Book[] = [];
   myReservations: any[] = [];
   
+  isSidebarOpen = false;
+  userProfile: any = null;
+  
+  // 'NONE', 'NAME', 'EMAIL', 'PASSWORD', 'DELETE' ou 'FINE' (Multa)
+  activeModal: string = 'NONE';
+
+  formData = {
+    currentPassword: '',
+    newName: '',
+    newEmail: '',
+    newPassword: '',
+    confirmNewPassword: ''
+  };
+
+  private usersService = inject(UsersService);
   private booksService = inject(BooksService);
   private authService = inject(AuthService);
   private toastr = inject(ToastrService);
@@ -23,6 +40,8 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.loadData();
+    this.loadUserProfile();
+    
   }
 
   loadData() {
@@ -76,6 +95,96 @@ export class DashboardComponent implements OnInit {
         this.loadData(); // Atualiza a tela
       },
       error: () => this.toastr.error('Erro na devolução')
+    });
+  }
+
+  loadUserProfile() {
+    const userId = this.authService.currentUserId;
+    if (userId) {
+      this.usersService.getProfile(userId).subscribe({
+        next: (u) => {
+          this.userProfile = u;
+          this.cdr.detectChanges();
+        },
+        error: () => this.toastr.error('Erro ao carregar perfil')
+      });
+    }
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  openModal(type: string) {
+    this.activeModal = type;
+    this.isSidebarOpen = false; // Fecha a sidebar ao abrir um modal
+    // Reseta o formulário
+    this.formData = {
+      currentPassword: '',
+      newName: this.userProfile?.name || '',
+      newEmail: this.userProfile?.email || '',
+      newPassword: '',
+      confirmNewPassword: ''
+    };
+  }
+
+  closeAllModals() {
+    this.activeModal = 'NONE';
+    this.showFineModal = false; // Garante que o de multa fecha também se usar a mesma lógica
+  }
+
+  // Função genérica para enviar as edições
+  submitUpdate() {
+    const userId = this.authService.currentUserId;
+    if (!userId) return;
+
+    if (!this.formData.currentPassword) {
+      this.toastr.warning('Senha atual é obrigatória.');
+      return;
+    }
+
+    let payload: any = { currentPassword: this.formData.currentPassword };
+
+    if (this.activeModal === 'NAME') payload.name = this.formData.newName;
+    if (this.activeModal === 'EMAIL') payload.email = this.formData.newEmail;
+    if (this.activeModal === 'PASSWORD') {
+      if (this.formData.newPassword !== this.formData.confirmNewPassword) {
+        this.toastr.error('Senhas não conferem.');
+        return;
+      }
+      payload.password = this.formData.newPassword;
+    }
+
+    this.usersService.update(userId, payload).subscribe({
+      next: () => {
+        this.toastr.success('Atualizado com sucesso!');
+        this.loadUserProfile(); // Atualiza os dados na sidebar
+        this.closeAllModals();  // <--- FECHA O MODAL AO SUCESSO
+      },
+      error: (err) => {
+        if (err.status === 401) this.toastr.error('Senha atual incorreta.');
+        else if (err.status === 409) this.toastr.error('Email já existe.');
+        else this.toastr.error('Erro ao atualizar.');
+      }
+    });
+  }
+
+  submitDelete() {
+    const userId = this.authService.currentUserId;
+    if (!userId || !this.formData.currentPassword) {
+        this.toastr.warning('Digite sua senha para confirmar.');
+        return;
+    }
+
+    this.usersService.delete(userId, this.formData.currentPassword).subscribe({
+        next: () => {
+            this.toastr.success('Conta excluída.');
+            this.authService.logout();
+        },
+        error: (err) => {
+            if(err.status === 400) this.toastr.warning(err.error.message); // Livros pendentes
+            else this.toastr.error('Erro ao excluir ou senha incorreta.');
+        }
     });
   }
 

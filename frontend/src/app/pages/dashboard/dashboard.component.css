@@ -110,7 +110,7 @@ my-books-section {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2500;
 }
 
 .modal-content {
@@ -127,3 +127,134 @@ my-books-section {
 .fine-value { font-size: 2rem; font-weight: bold; margin: 20px 0; color: #333; }
 .modal-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
 .btn-secondary { background-color: #999; color: white; }
+
+/* --- NOVO HEADER (Flexbox para alinhar Hamburger e Titulo) --- */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Botão Hamburger */
+.hamburger-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.hamburger-btn .bar {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background-color: var(--primary-color);
+  border-radius: 2px;
+}
+
+/* --- SIDEBAR (Fora da tela) --- */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -280px; /* Começa escondida na esquerda */
+  width: 280px;
+  height: 100vh;
+  background: white;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+  z-index: 2000; /* Bem na frente */
+  transition: left 0.3s ease-in-out; /* Animação suave */
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+
+  box-sizing: border-box;
+}
+
+.sidebar.open {
+  left: 0; /* Entra na tela */
+}
+
+/* Estilo interno da Sidebar */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.profile-summary {
+  background: #f0f4f8;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.profile-summary h3 { margin: 0 0 5px 0; font-size: 1.1rem; }
+.profile-summary .email { color: #666; font-size: 0.9rem; margin-bottom: 8px; }
+.cpf-badge { 
+  display: inline-block; 
+  background: #e0e0e0; 
+  padding: 2px 8px; 
+  border-radius: 4px; 
+  font-size: 0.8rem; 
+  font-family: monospace; 
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1; /* Empurra o footer pra baixo */
+}
+
+.menu-item {
+  background: none;
+  border: 1px solid #ddd;
+  text-align: left;
+  padding: 12px;
+  color: #333;
+  transition: all 0.2s;
+}
+.menu-item:hover { background: #f9f9f9; border-color: var(--primary-color); }
+.text-danger { color: #d32f2f; border-color: #ffcdd2; }
+.text-danger:hover { background: #ffebee; }
+
+.sidebar-footer {
+  margin-top: auto;
+}
+.btn-logout {
+  width: 100%;
+  background-color: var(--danger-color);
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+/* --- OVERLAY DE FUNDO --- */
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1500; /* Abaixo da sidebar, acima do resto */
+}
+
+/* Ajuste nos inputs do modal para ficarem bonitos */
+.form-body input {
+  margin-bottom: 15px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}

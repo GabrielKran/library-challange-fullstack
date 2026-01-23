@@ -1,8 +1,12 @@
 <div class="container">
   <header>
-    <h1>📚 Biblioteca Central</h1>
-    <div class="user-info">
-      <button (click)="logout()" class="btn-danger">Sair</button>
+    <div class="header-left">
+      <button class="hamburger-btn" (click)="toggleSidebar()">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+      <h1>📚 Biblioteca Central</h1>
     </div>
   </header>
 
@@ -72,6 +76,77 @@
                 (click)="reserve(book)">
           {{ book.isAvailable ? 'Reservar' : 'Reservado' }}
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<aside class="sidebar" [class.open]="isSidebarOpen">
+  <div class="sidebar-header">
+    <h2>Minha Conta</h2>
+    <button class="close-btn" (click)="toggleSidebar()">✕</button>
+  </div>
+
+  <div class="profile-summary" *ngIf="userProfile">
+    <h3>{{ userProfile.name }}</h3>
+    <p class="email">{{ userProfile.email }}</p>
+    <div class="cpf-badge">CPF: {{ userProfile.cpf }}</div>
+  </div>
+
+  <nav class="sidebar-menu">
+    <button class="menu-item" (click)="openModal('NAME')">✏️ Editar Nome</button>
+    <button class="menu-item" (click)="openModal('EMAIL')">📧 Editar Email</button>
+    <button class="menu-item" (click)="openModal('PASSWORD')">🔒 Trocar Senha</button>
+    <hr>
+    <button class="menu-item text-danger" (click)="openModal('DELETE')">🗑️ Excluir Conta</button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button (click)="logout()" class="btn-logout">Sair da Conta</button>
+  </div>
+</aside>
+
+<div class="overlay" 
+     *ngIf="isSidebarOpen || (activeModal !== 'NONE' && activeModal !== 'FINE')" 
+     (click)="isSidebarOpen = false; closeAllModals()">
+</div>
+
+<div class="modal-overlay" *ngIf="activeModal !== 'NONE' && activeModal !== 'FINE'">
+  <div class="modal-content">
+    
+    <h3 *ngIf="activeModal === 'NAME'">Alterar Nome</h3>
+    <h3 *ngIf="activeModal === 'EMAIL'">Alterar Email</h3>
+    <h3 *ngIf="activeModal === 'PASSWORD'">Alterar Senha</h3>
+    <h3 *ngIf="activeModal === 'DELETE'" style="color:red">Excluir Conta</h3>
+
+    <div class="form-body">
+      
+      <div *ngIf="activeModal === 'NAME'">
+        <input type="text" [(ngModel)]="formData.newName" placeholder="Novo nome completo">
+      </div>
+
+      <div *ngIf="activeModal === 'EMAIL'">
+        <input type="email" [(ngModel)]="formData.newEmail" placeholder="Novo email">
+      </div>
+
+      <div *ngIf="activeModal === 'PASSWORD'">
+        <input type="password" [(ngModel)]="formData.newPassword" placeholder="Nova senha">
+        <input type="password" [(ngModel)]="formData.confirmNewPassword" placeholder="Confirme a nova senha">
+      </div>
+
+      <div *ngIf="activeModal === 'DELETE'">
+        <p>Tem certeza? Isso apagará seu histórico de leitura para sempre.</p>
+      </div>
+
+      <hr>
+      <label style="display:block; text-align:left; margin-bottom:5px; font-size:0.9rem">Confirme sua Senha Atual:</label>
+      <input type="password" [(ngModel)]="formData.currentPassword" placeholder="Senha atual">
+      
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="closeAllModals()">Cancelar</button>
+        
+        <button *ngIf="activeModal !== 'DELETE'" class="btn-primary" (click)="submitUpdate()">Salvar</button>
+        <button *ngIf="activeModal === 'DELETE'" class="btn-danger" (click)="submitDelete()">Confirmar Exclusão</button>
       </div>
     </div>
   </div>
