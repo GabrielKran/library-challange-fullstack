@@ -120,21 +120,21 @@ export class ReservationsService {
     };
   }
 
-  async cancel(id: string) {
-    const reservation = await this.reservationRepository.findOne({ 
-        where: { id }, relations: ['book'] 
-    });
-    if (!reservation) throw new NotFoundException('Reserva não encontrada');
+  // async cancel(id: string) {
+  //   const reservation = await this.reservationRepository.findOne({ 
+  //       where: { id }, relations: ['book'] 
+  //   });
+  //   if (!reservation) throw new NotFoundException('Reserva não encontrada');
     
-    if (reservation.status !== 'ACTIVE') {
-      throw new BadRequestException('Não é possível cancelar reserva já finalizada');
-    }
+  //   if (reservation.status !== 'ACTIVE') {
+  //     throw new BadRequestException('Não é possível cancelar reserva já finalizada');
+  //   }
 
-    const book = reservation.book;
-    book.isAvailable = true;
-    await this.bookRepository.save(book);
+  //   const book = reservation.book;
+  //   book.isAvailable = true;
+  //   await this.bookRepository.save(book);
 
-    return this.reservationRepository.remove(reservation);
-  }
+  //   return this.reservationRepository.remove(reservation);
+  // }
   
 }

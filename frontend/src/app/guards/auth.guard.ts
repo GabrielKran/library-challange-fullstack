@@ -3,13 +3,12 @@ import { inject } from '@angular/core';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
-  const userId = localStorage.getItem('user_id');
+  const token = localStorage.getItem('access_token');
 
-  if (userId) {
-    return true; // Passa
-    
+  if (token) {
+    return true; 
   } else {
     router.navigate(['/login']);
-    return false; // Barrado
+    return false;
   }
 };

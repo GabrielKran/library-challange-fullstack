@@ -76,9 +76,13 @@ export class UsersService {
       throw new NotFoundException(`Usuário ID ${id} não encontrado`);
     }
 
-    if (user.reservations.length > 0) {
+    const hasPendingReservations = user.reservations.some(
+        res => res.status === 'ACTIVE',
+    );
+
+    if (hasPendingReservations) {
       throw new BadRequestException(
-        'Não é possível deletar usuário que possui histórico de reservas. (Regra de Integridade)'
+        'Não é possível excluir conta com livros pendentes de devolução.'
       );
     }
 

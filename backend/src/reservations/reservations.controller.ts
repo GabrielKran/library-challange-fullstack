@@ -33,15 +33,15 @@ export class ReservationsController {
     return this.reservationsService.create(payload);
   }
 
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'CLIENT')
   @Post(':id/return')
   returnBook(@Param('id') id: string) {
     return this.reservationsService.returnBook(id);
   }
 
-  @Roles('CLIENT')
-  @Delete(':id')
-  cancel(@Param('id') id: string) {
-      return this.reservationsService.cancel(id);
-    }
+  // @Roles('CLIENT')
+  // @Delete(':id')
+  // cancel(@Param('id') id: string) {
+  //     return this.reservationsService.cancel(id);
+  //   }
 }

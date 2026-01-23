@@ -9,10 +9,19 @@
         type="email" 
         [(ngModel)]="email" 
         placeholder="admin@library.com"
-        (keyup.enter)="onLogin()" 
       >
     </div>
 
+    <div class="form-group">
+      <label for="password">Senha</label>
+      <input 
+        id="password"
+        type="password" 
+        [(ngModel)]="password" 
+        placeholder="******"
+        (keyup.enter)="onLogin()" 
+      >
+    </div>
     <button class="btn-primary full-width" (click)="onLogin()">
       Acessar Sistema
     </button>

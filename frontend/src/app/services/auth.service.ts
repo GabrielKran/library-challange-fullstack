@@ -1,33 +1,27 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/users';
+  private apiUrl = 'http://localhost:3000/auth';
   private http = inject(HttpClient);
   private router = inject(Router);
 
-  // Procura usuário com esse email no backend
-  login(email: string): Observable<boolean> {
-    return this.http.get<any[]>(this.apiUrl).pipe(
-      map(users => {
-        const user = users.find(u => u.email === email);
-        if (user) {
-          // Salva no LocalStorage
-          localStorage.setItem('user_id', user.id);
-          localStorage.setItem('user_name', user.name);
-          localStorage.setItem('user_role', user.role || 'CLIENT'); // Futuro admin
-          return true;
-        }
-        return false;
+  login(credentials: { email: string; password: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
+      tap((response) => {
+        localStorage.setItem('access_token', response.access_token);
+        localStorage.setItem('user_id', response.user.id);
+        localStorage.setItem('user_name', response.user.name);
+        localStorage.setItem('user_role', response.user.role);
       })
     );
   }
 
   register(userData: any): Observable<any> {
-    return this.http.post(this.apiUrl, userData);
+    return this.http.post(`${this.apiUrl}/register`, userData);
   }
 
   logout() {
@@ -40,6 +34,6 @@ export class AuthService {
   }
 
   get isAuthenticated(): boolean {
-    return !!this.currentUserId;
+    return !!localStorage.getItem('access_token');
   }
 }
