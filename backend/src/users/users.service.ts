@@ -16,6 +16,10 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
 
+    if (!this.validateCPF(createUserDto.cpf)) {
+        throw new BadRequestException('CPF inválido. Dígitos verificadores incorretos.');
+    }
+
     const existingUser = await this.usersRepository.exists({
       where: [
        {email: createUserDto.email},
@@ -114,5 +118,18 @@ export class UsersService {
       where: { email },
       select: ['id', 'email', 'password', 'role', 'name']
     });
+  }
+
+  private validateCPF(cpf: string): boolean {
+    cpf = cpf.replace(/[^\d]+/g, '');
+
+    if (cpf.length !== 11 || !!cpf.match(/(\d)\1{10}/)) return false;
+
+    // Cálculo matemático dos dígitos
+    const cpfArray = cpf.split('').map(el => +el);
+    const rest = (count: number) => (cpfArray.slice(0, count-12)
+        .reduce((soma, el, index) => (soma + el * (count-index)), 0) * 10) % 11 % 10;
+
+    return rest(10) === cpfArray[9] && rest(11) === cpfArray[10];
   }
 }
