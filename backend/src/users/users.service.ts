@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -66,51 +66,69 @@ export class UsersService {
     return user;
   }
 
-  async remove(id: string, currentUser: any) {
+  async remove(id: string, currentUser: any, passwordConfirmation: string) {
     if (currentUser.role !== 'ADMIN' && currentUser.userId !== id) {
-        throw new ForbiddenException('Você não tem permissão para excluir este usuário.');
+        throw new ForbiddenException('Sem permissão.');
     }
 
-    const user = await this.usersRepository.findOne({ 
-      where: { id },
-      relations: ['reservations'] 
-    });
+    const user = await this.usersRepository.createQueryBuilder('user')
+      .where('user.id = :id', { id })
+      .addSelect('user.password')
+      .leftJoinAndSelect('user.reservations', 'reservations')
+      .getOne();
 
-    if (!user) {
-      throw new NotFoundException(`Usuário ID ${id} não encontrado`);
+    if (!user) throw new NotFoundException('Usuário não encontrado');
+
+    if (currentUser.role === 'CLIENT') {
+        if (!passwordConfirmation) throw new BadRequestException('Senha necessária para excluir conta.');
+        const isMatch = await bcrypt.compare(passwordConfirmation, user.password);
+        if (!isMatch) throw new UnauthorizedException('Senha incorreta. Não foi possível excluir.');
     }
 
-    const hasPendingReservations = user.reservations.some(
-        res => res.status === 'ACTIVE',
-    );
-
-    if (hasPendingReservations) {
-      throw new BadRequestException(
-        'Não é possível excluir conta com livros pendentes de devolução.'
-      );
-    }
+    const hasPending = user.reservations.some(res => res.status === 'ACTIVE');
+    if (hasPending) throw new BadRequestException('Livros pendentes. Devolva antes de excluir.');
 
     return this.usersRepository.remove(user);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    const user = await this.usersRepository.findOneBy({ id });
+    const user = await this.usersRepository.createQueryBuilder('user')
+      .where('user.id = :id', { id })
+      .addSelect('user.password')
+      .getOne();
+
     if (!user) throw new NotFoundException('Usuário não encontrado');
-    
+
+    const isCurrentPasswordValid = await bcrypt.compare(updateUserDto.currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+        throw new UnauthorizedException('A senha atual está incorreta.');
+    }
+
+    // ATUALIZAÇÃO DE EMAIL
     if (updateUserDto.email && updateUserDto.email !== user.email) {
       const emailExists = await this.usersRepository.findOneBy({ email: updateUserDto.email });
-      
-      if (emailExists && emailExists.id !== id) {
-        throw new ConflictException('Este e-mail já está em uso por outro usuário.');
-      }
+      if (emailExists && emailExists.id !== id) throw new ConflictException('Email já em uso.');
       user.email = updateUserDto.email;
     }
 
-    if (updateUserDto.name) {
-      user.name = updateUserDto.name;
+    // ATUALIZAÇÃO DE NOME
+    if (updateUserDto.name) user.name = updateUserDto.name;
+
+    // ATUALIZAÇÃO DE SENHA (NOVA)
+    if (updateUserDto.password) {
+        const isSamePassword = await bcrypt.compare(updateUserDto.password, user.password);
+        if (isSamePassword) {
+            throw new BadRequestException('A nova senha não pode ser igual à atual.');
+        }
+
+        const salt = await bcrypt.genSalt();
+        user.password = await bcrypt.hash(updateUserDto.password, salt);
     }
     
-    return this.usersRepository.save(user);
+    // Remove a senha do objeto de retorno para não vazar
+    const savedUser = await this.usersRepository.save(user);
+    delete (savedUser as any).password; 
+    return savedUser;
   }
 
   async findByEmailForAuth(email: string) {
