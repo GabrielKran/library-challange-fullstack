@@ -1,0 +1,162 @@
+<div class="admin-container">
+  
+  <header class="admin-header">
+    <div class="brand">
+      <span class="shield-icon">🛡️</span>
+      <h1>Painel Administrativo</h1>
+    </div>
+    <div class="user-info">
+      <span>Administrador</span>
+      <button (click)="authService.logout()" class="btn-logout">Sair</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button [class.active]="activeTab === 'RESERVATIONS'" (click)="activeTab = 'RESERVATIONS'">
+      📋 Reservas
+    </button>
+    <button [class.active]="activeTab === 'BOOKS'" (click)="activeTab = 'BOOKS'">
+      📚 Livros
+    </button>
+    <button [class.active]="activeTab === 'USERS'" (click)="activeTab = 'USERS'">
+      👥 Usuários
+    </button>
+  </div>
+
+  <div *ngIf="activeTab === 'RESERVATIONS'" class="tab-content">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Leitor</th>
+            <th>Livro</th>
+            <th>Prazo</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let res of reservations">
+            <td>
+              <span class="status-dot" 
+                [class.green]="res.status === 'COMPLETED'"
+                [class.red]="res.status === 'ACTIVE' && isLate(res.endDate)"
+                [class.yellow]="res.status === 'ACTIVE' && !isLate(res.endDate)">
+              </span>
+              {{ res.status === 'COMPLETED' ? 'Finalizado' : (isLate(res.endDate) ? 'Atrasado' : 'Ativo') }}
+            </td>
+            <td>{{ res.user?.name || '---' }}</td>
+            <td>{{ res.book?.title || '---' }}</td>
+            <td [class.text-red]="res.status === 'ACTIVE' && isLate(res.endDate)">
+                {{ res.endDate | date:'dd/MM' }}
+            </td>
+            <td>
+              <button *ngIf="res.status === 'ACTIVE'" class="btn-small btn-action" (click)="returnBook(res)">
+                ↩️ Devolver
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="reservations.length === 0" class="empty">Nenhuma reserva encontrada.</p>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'BOOKS'" class="tab-content">
+    <div class="actions-bar">
+      <button class="btn-primary" (click)="openNewBookModal()">+ Novo Livro</button>
+    </div>
+
+    <div class="grid-books">
+      <div *ngFor="let book of books" class="book-card-mini">
+        <img [src]="book.imageUrl" class="mini-cover">
+        <div class="mini-info">
+          <h3>{{ book.title }}</h3>
+          <div class="mini-actions">
+            <button class="btn-edit" (click)="openEditBookModal(book)">✏️</button>
+            <button class="btn-delete" (click)="confirmDeleteBook(book)">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'USERS'" class="tab-content">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>CPF</th>
+            <th>Role</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of users">
+            <td>{{ u.name }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.cpf }}</td>
+            <td>
+              <span class="badge" [class.badge-admin]="u.role === 'ADMIN'">
+                {{ u.role }}
+              </span>
+            </td>
+            <td>
+              <button *ngIf="u.role !== 'ADMIN'" class="btn-delete-user" (click)="confirmDeleteUser(u)">
+                🗑️ Excluir
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" *ngIf="showBookModal">
+  <div class="modal-content">
+    <h3>{{ isEditing ? 'Editar Livro' : 'Novo Livro' }}</h3>
+    <div class="form-body">
+      <label>Título</label>
+      <input type="text" [(ngModel)]="bookForm.title">
+      <label>Autor</label>
+      <input type="text" [(ngModel)]="bookForm.author">
+      <label>URL da Capa</label>
+      <input type="text" [(ngModel)]="bookForm.imageUrl">
+      <label>Descrição</label>
+      <input type="text" [(ngModel)]="bookForm.description">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="showBookModal = false">Cancelar</button>
+      <button class="btn-primary" (click)="submitBook()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showDeleteModal">
+  <div class="modal-content">
+    <h3 style="color: #d32f2f">Confirmação de Exclusão</h3>
+    
+    <div class="form-body" style="text-align: center; margin-bottom: 20px;">
+      <p *ngIf="deleteType === 'BOOK'">
+        Tem certeza que deseja apagar o livro <strong>{{ itemToDelete?.title }}</strong>?
+        <br><small>Essa ação é irreversível.</small>
+      </p>
+      
+      <p *ngIf="deleteType === 'USER'">
+        Tem certeza que deseja excluir o usuário <strong>{{ itemToDelete?.name }}</strong>?
+        <br><small>Se ele tiver livros pendentes, a ação será bloqueada.</small>
+      </p>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="showDeleteModal = false">Cancelar</button>
+      <button class="btn-danger" style="background-color: #d32f2f; color: white; border: none;" (click)="executeDelete()">
+        Confirmar Exclusão
+      </button>
+    </div>
+  </div>
+</div>

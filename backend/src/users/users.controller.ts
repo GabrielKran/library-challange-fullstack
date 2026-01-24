@@ -24,7 +24,7 @@ export class UsersController {
   @Roles('ADMIN', 'CLIENT')
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req, @Body() body: { password: string }) {
-    return this.usersService.remove(id, req.user, body.password);
+    return this.usersService.remove(id, req.user, body?.password);
   }
 
   @Roles('CLIENT')
@@ -33,7 +33,7 @@ export class UsersController {
     if (req.user.userId !== id) {
       throw new ForbiddenException('Você só pode alterar seu próprio perfil.');
     }
-    
+
     return this.usersService.update(id, updateUserDto);
   }
 }

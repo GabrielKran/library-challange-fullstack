@@ -26,7 +26,7 @@ export class LoginComponent {
       return;
     }
 
-    // 2. Validação de Formato (Economiza requisição)
+    // 2. Validação de Formato
     if (this.password.length < 6) {
       this.toastr.warning('A senha deve ter no mínimo 6 caracteres.');
       return;
@@ -34,28 +34,31 @@ export class LoginComponent {
 
     // 3. O Envio
     this.authService.login({ email: this.email, password: this.password }).subscribe({
-      next: () => {
+      // AQUI ESTÁ A MUDANÇA: Recebemos 'res' para ver quem é o usuário
+      next: (res) => {
         this.toastr.success('Bem-vindo de volta!');
-        this.router.navigate(['/dashboard']);
+
+        // LÓGICA DE REDIRECIONAMENTO INTELIGENTE
+        const role = res.user.role; // Pega a role que veio do backend
+        
+        if (role === 'ADMIN') {
+            this.router.navigate(['/admin']);
+        } else {
+            this.router.navigate(['/dashboard']);
+        }
       },
       error: (err) => {
-        console.error('Erro detalhado:', err); // <--- AJUDA NO DEBUG
+        console.error('Erro detalhado:', err);
 
-        // 4. Tratamento Inteligente de Erros do NestJS
+        // 4. Tratamento de Erros (Mantive o seu que estava ótimo)
         if (err.status === 401) {
-          // Erro jogado pelo AuthService (Credenciais erradas)
           this.toastr.error('Email ou senha incorretos.');
         } 
         else if (err.status === 400) {
-          // Erro jogado pelo ValidationPipe (DTO) ou Regra de Negócio
-          // O Nest geralmente devolve: { message: ["password too short", ...], ... }
           const messages = err.error?.message;
-          
           if (Array.isArray(messages)) {
-            // Se for array de erros de validação, mostra o primeiro
             this.toastr.warning(messages[0]); 
           } else {
-            // Se for mensagem única
             this.toastr.warning(messages || 'Dados inválidos.');
           }
         } 
