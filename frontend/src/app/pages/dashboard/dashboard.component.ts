@@ -160,11 +160,15 @@ export class DashboardComponent implements OnInit {
         this.toastr.success('Atualizado com sucesso!');
         this.loadUserProfile(); // Atualiza os dados na sidebar
         this.closeAllModals();  // <--- FECHA O MODAL AO SUCESSO
+
+        this.cdr.detectChanges();
       },
       error: (err) => {
         if (err.status === 401) this.toastr.error('Senha atual incorreta.');
         else if (err.status === 409) this.toastr.error('Email já existe.');
         else this.toastr.error('Erro ao atualizar.');
+
+        this.cdr.detectChanges();
       }
     });
   }
