@@ -9,10 +9,9 @@ import { BadRequestException } from '@nestjs/common';
 // Data Fixa: 10 de Fevereiro de 2026, meio-dia
 const MOCK_CURRENT_DATE = new Date('2026-02-10T12:00:00Z');
 
-describe('ReservationsService - Testes de Regra de Negócio', () => {
+describe('ReservationsService', () => {
   let service: ReservationsService;
   
-  // Mocks: Fingem ser o banco de dados
   const mockReservationRepo = {
     create: jest.fn(),
     save: jest.fn(),
@@ -23,11 +22,10 @@ describe('ReservationsService - Testes de Regra de Negócio', () => {
     save: jest.fn(),
   };
   const mockUserRepo = {
-    findOneBy: jest.fn(), // Necessário para validar usuário no create
+    findOneBy: jest.fn(),
   };
 
   beforeEach(async () => {
-    // Truque do Jest para congelar o tempo
     jest.useFakeTimers();
     jest.setSystemTime(MOCK_CURRENT_DATE);
 
@@ -45,42 +43,37 @@ describe('ReservationsService - Testes de Regra de Negócio', () => {
 
   afterEach(() => {
     jest.useRealTimers();
-    jest.clearAllMocks(); // Limpa a sujeira entre testes
+    jest.clearAllMocks();
   });
 
-  describe('Cálculo de Multa (Devolução)', () => {
-    it('Deve cobrar R$ 5,50 para 2 dias de atraso', async () => {
-      // CENÁRIO: O prazo era dia 08/02. Hoje é dia 10/02.
-      const prazoVencido = new Date('2026-02-08T12:00:00Z');
+  describe('returnBook (Cálculo de Multa)', () => {
+    it('deve calcular a multa corretamente para devolução atrasada (2 dias de atraso)', async () => {
+      // Vencimento: 08/Fev. Data Atual (Mock): 10/Fev.
+      const pastDueDate = new Date('2026-02-08T12:00:00Z');
       
       const mockReservation = {
         id: 'res-1',
-        endDate: prazoVencido,
+        endDate: pastDueDate,
         status: 'ACTIVE',
         book: { id: 'book-1', isAvailable: false },
       };
 
-      // Quando o service buscar, retorna essa reserva vencida
       mockReservationRepo.findOne.mockResolvedValue(mockReservation);
-      // Quando salvar, retorna ela atualizada
       mockReservationRepo.save.mockResolvedValue({ ...mockReservation, status: 'COMPLETED' });
 
-      // AÇÃO
       const result = await service.returnBook('res-1');
 
-      // VERIFICAÇÃO
       expect(result.daysLate).toBe(2);
       expect(result.fineToPay).toBe(5.5); // 5.00 + (5% * 2)
-      expect(mockBookRepo.save).toHaveBeenCalled(); // Garante que destravou o livro
+      expect(mockBookRepo.save).toHaveBeenCalled();
     });
 
-    it('Não deve cobrar multa se entregar no prazo', async () => {
-      // CENÁRIO: O prazo é dia 15/02. Hoje é dia 10/02.
-      const prazoFuturo = new Date('2026-02-15T12:00:00Z');
+    it('não deve cobrar multa se devolvido no prazo', async () => {
+      const futureDate = new Date('2026-02-15T12:00:00Z');
       
       const mockReservation = {
         id: 'res-2',
-        endDate: prazoFuturo,
+        endDate: futureDate,
         status: 'ACTIVE',
         book: { id: 'book-2', isAvailable: false },
       };
@@ -95,20 +88,13 @@ describe('ReservationsService - Testes de Regra de Negócio', () => {
     });
   });
 
-  describe('Criação de Reserva (Bloqueio)', () => {
-    it('NÃO deve permitir reservar livro indisponível', async () => {
-      // CENÁRIO: Livro já está emprestado (isAvailable: false)
-      const mockUser = { id: 'user-1', name: 'Gabriel' };
-      const mockBook = { id: 'book-1', title: 'Clean Code', isAvailable: false };
+  describe('create', () => {
+    it('deve lançar BadRequestException se o livro estiver indisponível', async () => {
+      mockUserRepo.findOneBy.mockResolvedValue({ id: 'user-1' });
+      mockBookRepo.findOneBy.mockResolvedValue({ id: 'book-1', isAvailable: false });
 
-      mockUserRepo.findOneBy.mockResolvedValue(mockUser);
-      mockBookRepo.findOneBy.mockResolvedValue(mockBook);
-
-      // AÇÃO & VERIFICAÇÃO
-      // Espera que a função 'create' solte um erro BadRequestException
       await expect(service.create({ userId: 'user-1', bookId: 'book-1' }))
-        .rejects
-        .toThrow(BadRequestException);
+        .rejects.toThrow(BadRequestException);
     });
   });
 });
