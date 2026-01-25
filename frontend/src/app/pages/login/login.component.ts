@@ -20,25 +20,24 @@ export class LoginComponent {
   private toastr = inject(ToastrService);
 
   onLogin() {
-    // 1. Validação de Preenchimento Básico
+    // Validação de Preenchimento Básico
     if (!this.email.trim() || !this.password.trim()) {
       this.toastr.warning('Por favor, preencha email e senha.');
       return;
     }
 
-    // 2. Validação de Formato
+    // Validação de Formato
     if (this.password.length < 6) {
       this.toastr.warning('A senha deve ter no mínimo 6 caracteres.');
       return;
     }
 
-    // 3. O Envio
+    // O Envio
     this.authService.login({ email: this.email, password: this.password }).subscribe({
-      // AQUI ESTÁ A MUDANÇA: Recebemos 'res' para ver quem é o usuário
+      // Recebe 'res' para ver quem é o usuário
       next: (res) => {
         this.toastr.success('Bem-vindo de volta!');
 
-        // LÓGICA DE REDIRECIONAMENTO INTELIGENTE
         const role = res.user.role; // Pega a role que veio do backend
         
         if (role === 'ADMIN') {
@@ -50,7 +49,6 @@ export class LoginComponent {
       error: (err) => {
         console.error('Erro detalhado:', err);
 
-        // 4. Tratamento de Erros (Mantive o seu que estava ótimo)
         if (err.status === 401) {
           this.toastr.error('Email ou senha incorretos.');
         } 

@@ -25,7 +25,7 @@ h1 { color: var(--primary-color); }
   padding: 15px;
   display: flex;
   flex-direction: column;
-  flex: 1; /* Faz o corpo esticar para alinhar botões */
+  flex: 1;
   justify-content: space-between;
 }
 
@@ -52,7 +52,7 @@ my-books-section {
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
-  border: 1px solid #d1c4e9; /* Borda roxa suave */
+  border: 1px solid #d1c4e9;
 }
 
 .active-loan {
@@ -61,7 +61,7 @@ my-books-section {
 }
 
 .btn-return {
-  background-color: #ff9800; /* Laranja */
+  background-color: #ff9800;
   color: white;
   width: 100%;
   padding: 10px;
@@ -119,7 +119,7 @@ my-books-section {
 .modal-content {
   background: #ffffff;
   padding: 32px;
-  border-radius: 16px; /* Cantos mais suaves */
+  border-radius: 16px;
   width: 90%;
   max-width: 420px;
   
@@ -156,7 +156,7 @@ my-books-section {
 
 .modal-actions { 
   display: flex; 
-  flex-direction: column; /* Botões empilhados ficam melhores no mobile */
+  flex-direction: column;
   gap: 12px; 
   margin-top: 25px; 
 }
@@ -205,13 +205,13 @@ my-books-section {
 .sidebar {
   position: fixed;
   top: 0;
-  left: -280px; /* Começa escondida na esquerda */
+  left: -280px;
   width: 280px;
   height: 100vh;
   background: white;
   box-shadow: 2px 0 10px rgba(0,0,0,0.2);
-  z-index: 2000; /* Bem na frente */
-  transition: left 0.3s ease-in-out; /* Animação suave */
+  z-index: 2000;
+  transition: left 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
   padding: 20px;

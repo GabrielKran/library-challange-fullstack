@@ -9,7 +9,6 @@ describe('BooksService', () => {
   let mockBooksRepository;
 
   beforeEach(async () => {
-    // Definindo os mocks para todas as funções que o Service usa
     mockBooksRepository = {
       create: jest.fn(),
       save: jest.fn(),

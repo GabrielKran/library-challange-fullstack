@@ -13,7 +13,7 @@ import { AuthModule } from './auth/auth.module';
       isGlobal:true,
     }),
     
-    // Configuração assíncrona do TypeORM (igual configurar o DataSource no Java)
+    // Configuração assíncrona do TypeORM
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST,
@@ -22,7 +22,7 @@ import { AuthModule } from './auth/auth.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       entities: [__dirname + '/**/*.entity{.ts,.js}'], // Escaneia todas as entidades
-      synchronize: true, // Isso cria as tabelas sozinho (Auto-DDL).
+      synchronize: true, // Cria tabelas sozinho (Auto-DDL).
     }),
     
     UsersModule,

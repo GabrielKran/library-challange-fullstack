@@ -24,7 +24,7 @@ export class Reservation {
   @Column({ nullable: true })
   returnDate: Date; // Data real que devolveu (Se null, ainda está com o livro)
 
-  @Column({ default: 'ACTIVE' }) // ACTIVE, COMPLETED, CANCELED
+  @Column({ default: 'ACTIVE' }) // ACTIVE (reserva ativa), COMPLETED (devolvido)
   status: string;
 
   @CreateDateColumn()

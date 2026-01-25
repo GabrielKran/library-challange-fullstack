@@ -4,7 +4,7 @@ import { inject } from '@angular/core';
 export const adminGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const token = localStorage.getItem('access_token');
-  const role = localStorage.getItem('user_role'); // Vamos garantir que isso exista no login
+  const role = localStorage.getItem('user_role');
 
   if (token && role === 'ADMIN') {
     return true; 

@@ -212,7 +212,7 @@ export class DashboardComponent implements OnInit {
     const now = new Date();
 
     if (now > dueDate) {
-      // Calculamos uma estimativa rápida pra mostrar no modal
+      // Calcula estimativa de tempo
       const diffTime = Math.abs(now.getTime() - dueDate.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
       
@@ -220,7 +220,7 @@ export class DashboardComponent implements OnInit {
       this.fineSimulation = 5.00 + (diffDays * 0.25); 
       
       this.selectedReservation = reservation;
-      this.showFineModal = true; // ABRE O MODAL
+      this.showFineModal = true;
     } else {
       // Se não tiver multa, devolve direto
       this.confirmReturn(reservation.id);

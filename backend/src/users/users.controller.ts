@@ -1,6 +1,5 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, Req, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Body, Param, Delete, Patch, UseGuards, Req, ForbiddenException } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Roles } from 'src/auth/roles.decorator';

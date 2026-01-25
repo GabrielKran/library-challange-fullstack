@@ -7,11 +7,11 @@ import { ConfigService } from '@nestjs/config';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
     super({
-      // 1. Onde buscar o token? No cabeçalho da requisição (Bearer Token)
+      // 1. Procura o token no header da requisição
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      // 2. Aceita token vencido? Não.
+      // 2. Nçao aceita token vencido
       ignoreExpiration: false,
-      // 3. Qual a chave secreta para validar? Pega do .env
+      // 3. Pega a secret na env
       secretOrKey: configService.get<string>('JWT_SECRET')!,
     });
   }

@@ -95,7 +95,7 @@ export class AdminDashboardComponent implements OnInit {
 
   openEditBookModal(book: any) {
     this.isEditing = true;
-    this.bookForm = { ...book }; // Clona tudo (incluindo lixo que não vamos enviar)
+    this.bookForm = { ...book }; // Clona tudo
     this.showBookModal = true;
   }
 
@@ -105,9 +105,7 @@ export class AdminDashboardComponent implements OnInit {
       return;
     }
 
-    // === LIMPEZA DE PAYLOAD (A CORREÇÃO) ===
-    // Criamos um objeto LIMPO apenas com o que o DTO do backend aceita.
-    // Ignoramos 'isAvailable', 'createdAt', 'id' (no body), etc.
+    // === LIMPEZA DE PAYLOAD ===
     const cleanPayload = {
         title: this.bookForm.title,
         author: this.bookForm.author,

@@ -16,12 +16,6 @@ export class ReservationsController {
     return this.reservationsService.findAll(req.user);
   }
 
-  // @UseGuards(JwtAuthGuard)
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.reservationsService.findOne(id);
-  // }
-
   @Roles('CLIENT')
   @Post()
   create(@Body() createReservationDto: CreateReservationDto, @Req() req) {
@@ -38,10 +32,4 @@ export class ReservationsController {
   returnBook(@Param('id') id: string) {
     return this.reservationsService.returnBook(id);
   }
-
-  // @Roles('CLIENT')
-  // @Delete(':id')
-  // cancel(@Param('id') id: string) {
-  //     return this.reservationsService.cancel(id);
-  //   }
 }

@@ -25,7 +25,7 @@ export class BooksService {
     return this.http.post(`${this.apiUrl}/reservations`, { userId, bookId });
   }
 
-  // Pegar minhas reservas (Filtro no front por enquanto)
+  // Pega reservas do usuário logado
   getMyReservations(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/reservations`);
   }
