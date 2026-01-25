@@ -1,75 +1,92 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './src/app.module';
-import { UsersService } from './src/users/users.service';
-import { BooksService } from './src/books/books.service';
+import { DataSource } from 'typeorm';
+import { Book } from './src/books/entities/book.entity';
 
 async function bootstrap() {
-  // Cria o contexto da aplicação (conecta no banco)
   const app = await NestFactory.createApplicationContext(AppModule);
-  
-  const usersService = app.get(UsersService);
-  const booksService = app.get(BooksService);
+  const dataSource = app.get(DataSource);
 
-  console.log('Iniciando Seed...');
+  const bookRepo = dataSource.getRepository(Book);
 
-  // 1. Criar Usuários
-  const user1 = await usersService.create({
-    name: 'Gabriel Tech Lead',
-    email: 'admin@library.com',
-    cpf: '111.111.111-11',
-    password: '123456'
-  });
-  
-  const user2 = await usersService.create({
-    name: 'Ana Leitora',
-    email: 'ana@library.com',
-    cpf: '222.222.222-22',
-    password: '123456'
-  });
+  console.log('🌱 Iniciando Seed (Apenas Criação)...');
 
-  console.log('Usuários criados');
+  // === CRIAÇÃO DOS LIVROS ===
+  console.log('📚 Adicionando livros técnicos...');
 
-  // 2. Criar Livros (Com capas reais)
-  const books = [
+  const techBooks = [
     {
-      title: 'Clean Code',
+      title: 'Node.js Design Patterns',
+      author: 'Mario Casciaro',
+      description: 'Domine padrões de projeto para criar aplicações Node.js eficientes e escaláveis.',
+      imageUrl: 'https://m.media-amazon.com/images/I/71W5FQMX8LL.jpg' 
+    },
+    {
+      title: 'Docker Deep Dive',
+      author: 'Nigel Poulton',
+      description: 'Domine containers e orquestração com Docker de ponta a ponta.',
+      imageUrl: 'https://m.media-amazon.com/images/I/71Bkk+WVLsL._UF1000,1000_QL80_.jpg'
+    },
+    {
+      title: 'Arquitetura Limpa',
       author: 'Robert C. Martin',
-      imageUrl: 'https://m.media-amazon.com/images/I/41xShlnTZgL._SX218_BO1,204,203,200_QL40_ML2_.jpg',
-      description: 'O manual definitivo do código limpo.'
+      description: 'O guia do artesão para estrutura e design de software.',
+      imageUrl: 'https://m.media-amazon.com/images/I/815d9tE7jSL.jpg'
     },
     {
-      title: 'O Hobbit',
-      author: 'J.R.R. Tolkien',
-      imageUrl: 'https://m.media-amazon.com/images/I/91M9xPIf10L._AC_UF1000,1000_QL80_.jpg',
-      description: 'Uma jornada inesperada.'
+      title: 'Angular: Development with TypeScript',
+      author: 'Yakov Fain',
+      description: 'Desenvolvimento moderno de frontend utilizando Angular e TypeScript.',
+      imageUrl: 'https://m.media-amazon.com/images/I/71HEl0ZR4jL._AC_UF1000,1000_QL80_.jpg'
     },
     {
-      title: 'Entendendo Algoritmos',
-      author: 'Aditya Bhargava',
-      imageUrl: 'https://m.media-amazon.com/images/I/71V2362c9ZL._AC_UF1000,1000_QL80_.jpg',
-      description: 'Um guia ilustrado para programadores.'
+      title: 'Designing Data-Intensive Applications',
+      author: 'Martin Kleppmann',
+      description: 'As grandes ideias por trás de sistemas confiáveis e escaláveis.',
+      imageUrl: 'https://m.media-amazon.com/images/I/71Le4i4KrFL._AC_UF1000,1000_QL80_.jpg'
     },
     {
-      title: 'Harry Potter e a Pedra Filosofal',
-      author: 'J.K. Rowling',
-      imageUrl: 'https://m.media-amazon.com/images/I/81ibfYk4qXL._AC_UF1000,1000_QL80_.jpg',
-      description: 'O menino que sobreviveu.'
+      title: 'Padrões de Projeto (GoF)',
+      author: 'Erich Gamma',
+      description: 'Soluções reutilizáveis de software orientado a objetos.',
+      imageUrl: 'https://m.media-amazon.com/images/I/9169z5-CtML._UF1000,1000_QL80_.jpg'
     },
     {
-      title: 'Domain-Driven Design',
-      author: 'Eric Evans',
-      imageUrl: 'https://m.media-amazon.com/images/I/61r4tYIJrML._AC_UF1000,1000_QL80_.jpg',
-      description: 'Atacando a complexidade no coração do software.'
+      title: 'Microsserviços Prontos Para a Produção',
+      author: 'Susan J. Fowler',
+      description: 'Construindo sistemas padronizados em uma organização de engenharia.',
+      imageUrl: 'https://m.media-amazon.com/images/I/81wWegQvePL._UF1000,1000_QL80_.jpg'
+    },
+    {
+      title: 'The DevOps Handbook',
+      author: 'Gene Kim',
+      description: 'Como criar agilidade, confiabilidade e segurança na tecnologia.',
+      imageUrl: 'https://m.media-amazon.com/images/I/71mhqEw8LcL._AC_UF1000,1000_QL80_.jpg'
+    },
+    {
+      title: 'Refatoração',
+      author: 'Martin Fowler',
+      description: 'Aperfeiçoando o projeto de código existente.',
+      imageUrl: 'https://m.media-amazon.com/images/I/81qTq0PQp3L._UF1000,1000_QL80_.jpg'
+    },
+    {
+      title: 'Engenharia de Software Moderna',
+      author: 'David Farley',
+      description: 'Entrega contínua e a ciência no desenvolvimento de software.',
+      imageUrl: 'https://m.media-amazon.com/images/I/51YZ7o1Y9JL._SL500_.jpg'
     }
   ];
 
-  for (const book of books) {
-    await booksService.create(book);
+  for (const bookData of techBooks) {
+    // Cria a entidade e salva
+    const book = bookRepo.create({
+        ...bookData,
+        isAvailable: true // Garante que nascem disponíveis
+    });
+    await bookRepo.save(book);
   }
 
-  console.log('Livros criados');
-  console.log('Seed finalizado com sucesso');
-  
+  console.log('✅ Seed finalizado! Livros adicionados com sucesso.');
   await app.close();
 }
 
